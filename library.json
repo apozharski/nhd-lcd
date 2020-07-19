@@ -1,0 +1,19 @@
+{
+  "name": "nhd-lcd",
+  "keywords": "",
+  "description": "A library that is designed to generalize NHD I2C, RS-232, and SPI controlled LCDs",
+  "url": "TODO",
+  "include": "LCD",
+  "authors":
+  [
+    {
+      "name": "Anton Pozharskiy"
+    }
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/apozharski/nhd-lcd"
+  },
+  "frameworks": "arduino"
+}
