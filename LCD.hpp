@@ -30,7 +30,7 @@
 #include "types/BasicOnOff.hpp"
 
 // Standard
-#include <cstdint>
+#include <stdint.h>
 
 namespace nhd
 {
@@ -45,21 +45,21 @@ class LCD
   /// @brief constructor for the LCD interface
   /// @param lcd_addr address for the LCD panel to be controlled.
   ///                 Default from manual: http://www.newhavendisplay.com/specs/NHD-0216K3Z-FSRGB-FBW-V3.pdf
-  LCD(std::uint8_t lcd_addr = 0x50) :
-    m_lcd_addr{addr}
+  LCD(uint8_t lcd_addr = 0x50) :
+    m_lcd_addr{lcd_addr}
   {
   }
 
   /// @brief initializes the LCD panel, clearing everything off of it.
   /// @note  This assumes `Wire.init()` has been called in order to initialize the twi interface.
-  void LCD::init()
+  void init()
   {
     // Set the twi to normal speed.
     Wire.setClock(100000);
     /// @todo (apozharskiy) what else do I need to do here? Probably nothing but :shrug:
   }
 
-  void LCD::setLcdState(types::BasicOnOff state)
+  void setLcdState(types::BasicOnOff state)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -73,7 +73,7 @@ class LCD
     Wire.endTransmission();
   }
 
-  void LCD::homeCursor()
+  void homeCursor()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -81,7 +81,7 @@ class LCD
     Wire.endTransmission();
   }
 
-  void LCD::cursorRight()
+  void cursorRight()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -89,7 +89,7 @@ class LCD
     Wire.endTransmission();
   }
 
-  void LCD::cursorLeft()
+  void cursorLeft()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -97,18 +97,18 @@ class LCD
     Wire.endTransmission();
   }
   
-  void LCD::setCursorPosition(std::uint8_t r, std::uint8_t c)
+  void setCursorPosition(uint8_t r, uint8_t c)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x45);
     /// @todo do check bounds here and more generalized the position calculation. 
-    std::uint8_t pos = r*0x4 + c;
+    uint8_t pos = r*0x4 + c;
     Wire.write(pos);
     Wire.endTransmission();
   }
 
-  void LCD::clearScreen()
+  void clearScreen()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -116,7 +116,7 @@ class LCD
     Wire.endTransmission();
   }
 
-  void LCD::setDisplayContrast(std::uint8_t contrast)
+  void setDisplayContrast(uint8_t contrast)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -126,7 +126,7 @@ class LCD
     Wire.endTransmission();
   }
 
-  void LCD::setBacklightBrightness(std::uint8_t brightness)
+  void setBacklightBrightness(uint8_t brightness)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -136,14 +136,19 @@ class LCD
     Wire.endTransmission();
   }
 
-  LCD& operator<<(std::string)
+  LCD& operator<<(char* s)
   {
-    /// @todo implement this
+    while(*s != 0)
+    {
+      Wire.write(s);
+      cursorRight();
+      s++;
+    }
     return *this;
   }
  private:
-  std::uint8_t m_lcd_addr;
-  char m_screen_buffer[R][C];
+  uint8_t m_lcd_addr;
+  char m_screen_buffer[R][C]; /// @todo make << operate with the screen_buffer. 
 };
 } // namespace nhd
 
