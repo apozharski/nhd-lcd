@@ -51,15 +51,15 @@ class LCD
   }
 
   /// @brief initializes the LCD panel, clearing everything off of it.
-  /// @note  This assumes `Wire.init()` has been called in order to initialize the twi interface.
+  /// @note  This assumes `Wire.begin()` has been called in order to initialize the twi interface.
   void init()
   {
     // Set the twi to normal speed.
-    Wire.setClock(100000);
+    Wire.setClock(10000);
     /// @todo (apozharskiy) what else do I need to do here? Probably nothing but :shrug:
   }
 
-  void setLcdState(types::BasicOnOff state)
+  uint8_t setLcdState(types::BasicOnOff state)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -67,37 +67,47 @@ class LCD
     {
      case types::BasicOnOff::ON:
        Wire.write(0x41);
+       break;
      case types::BasicOnOff::OFF:
        Wire.write(0x42);
+       break;
     }
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void homeCursor()
+  uint8_t homeCursor()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x46);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void cursorRight()
+  uint8_t turnOnUnderline()
+  {
+    Wire.beginTransmission(m_lcd_addr);
+    Wire.write(0xFE);
+    Wire.write(0x47);
+    return Wire.endTransmission();
+  }
+
+  uint8_t cursorRight()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x4A);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void cursorLeft()
+  uint8_t cursorLeft()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x49);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
   
-  void setCursorPosition(uint8_t r, uint8_t c)
+  uint8_t setCursorPosition(uint8_t r, uint8_t c)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
@@ -105,42 +115,50 @@ class LCD
     /// @todo do check bounds here and more generalized the position calculation. 
     uint8_t pos = r*0x4 + c;
     Wire.write(pos);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void clearScreen()
+  uint8_t clearScreen()
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x51);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void setDisplayContrast(uint8_t contrast)
+  uint8_t setDisplayContrast(uint8_t contrast)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x52);
     /// @todo do contrast bound's check.
     Wire.write(contrast);
-    Wire.endTransmission();
+    return Wire.endTransmission();
   }
 
-  void setBacklightBrightness(uint8_t brightness)
+  uint8_t setBacklightBrightness(uint8_t brightness)
   {
     Wire.beginTransmission(m_lcd_addr);
     Wire.write(0xFE);
     Wire.write(0x53);
     /// @todo do brightness bounds check
     Wire.write(brightness);
-    Wire.endTransmission();
+    return Wire.endTransmission();
+  }
+  uint8_t sendChar(char c)
+  {
+    Wire.beginTransmission(m_lcd_addr);
+    Wire.write(c);
+    return Wire.endTransmission();
   }
 
   LCD& operator<<(char* s)
   {
     while(*s != 0)
     {
-      Wire.write(s);
+      Wire.beginTransmission(m_lcd_addr);
+      Wire.write(*s);
+      Wire.endTransmission();
       cursorRight();
       s++;
     }
